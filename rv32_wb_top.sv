@@ -34,14 +34,43 @@ module rv32_wb_top(
     input wb_enable_in, 
     
     // register interface 
-    output reg regif_wb_enable,
-    output reg [4:0] regif_wb_reg,
-    output reg [31:0] regif_wb_data
+    output  regif_wb_enable,
+    output  [4:0] regif_wb_reg,
+    output logic ebreak_detected,
+    
+    input [31:0] memif_rdata,
+    input [31:0] io_rdata,
+    
+    input [1:0] wb_src_in,
+    output logic [31:0] regif_wb_data
     );
+    
+    always_comb 
+    begin
+      case (wb_src_in)
+        2'b00: regif_wb_data = alu_in;
+        2'b01: regif_wb_data = memif_rdata;
+        2'b10: regif_wb_data = io_rdata;
+        default: regif_wb_data = 32'd0;
+      endcase
+    end
     
     assign regif_wb_enable = wb_enable_in;
     assign regif_wb_reg    = wb_reg_in;
-    assign regif_wb_data   = alu_in;
+    //assign regif_wb_data   = alu_in;
+    
+    always_comb
+    begin 
+      if (iw_in == 32'h0010_0073)
+      begin
+        ebreak_detected = 1'b1;
+      end 
+      else 
+      begin 
+        ebreak_detected = 1'b0;
+      end
+    end
+    
 
    // always_ff @(posedge clk)
   //  begin

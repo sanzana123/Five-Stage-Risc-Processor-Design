@@ -37,22 +37,17 @@ module rv32i_regs(
 
     );
     
-    logic preset;
-    logic new_reset;
+   // logic preset;
+   // logic new_reset;
     
     logic [31:0] regs [31:0];
     integer i;
     
     // Handling metastability of PB[0]
-    always_ff @(posedge clk)
-    begin 
-      preset <= reset;
-      new_reset <= preset;
-    end
     
     always_ff @(posedge clk)
     begin 
-      if (new_reset)
+      if (reset)
       begin 
         for (i=0; i<6'd32; i++)
         begin 

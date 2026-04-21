@@ -33,7 +33,12 @@ module rv32_if_top(
     
     // to id 
     output reg [31:0] pc_out, // output of this stage 
-    output [31:0] iw_out // instruction word output passed to the decode stage 
+    output [31:0] iw_out, // instruction word output passed to the decode stage 
+    
+    // from id 
+    input jump_enable_in,
+    input [31:0] jump_addr_in
+    
     
     );
     
@@ -44,34 +49,40 @@ module rv32_if_top(
     logic [31:0] pc_reg;
     logic [31:0] pc_delayed;
     
-    always_ff @(posedge clk)
-    begin
-        if (reset)
-            pc_delayed <= PC_RESET;
-        else if (halt)
-            pc_delayed <= pc_delayed;
-        else
-            pc_delayed <= pc_reg;
-    end
+//    always_ff @(posedge clk)
+//    begin
+//        if (reset)
+//            pc_delayed <= PC_RESET;
+//        else if (halt)
+//            pc_delayed <= pc_delayed;
+//        else
+//            pc_delayed <= pc_reg;
+//    end
     
-    always_ff @(posedge clk) 
-    begin 
-      if (reset) 
-      begin 
-        pc_reg <= PC_RESET;
-      end 
-      else if (halt)
-      begin 
-        pc_reg <= pc_reg;
-      end 
-      else
-      begin 
-        pc_reg <= pc_reg + 32'd4;
-      end
-    end 
+//    always_ff @(posedge clk) 
+//    begin 
+//      if (reset) 
+//      begin 
+//        pc_reg <= PC_RESET;
+//      end 
+//      else if (halt)
+//      begin 
+//        pc_reg <= pc_reg;
+//      end 
+//      else if (jump_enable_in)
+//      begin 
+//        pc_reg <= jump_addr_in;
+//      end
+//      else
+//      begin 
+//        pc_reg <= pc_reg + 32'd4;
+//      end
+//    end 
     
    
-    assign memif_addr = pc_reg [31:2];
+    //assign memif_addr = pc_out [31:2];
+    assign memif_addr = pc_out [31:2];
+
 
 
     assign iw_out = memif_data;
@@ -82,12 +93,12 @@ module rv32_if_top(
             pc_out <= PC_RESET;
         else if (halt)
             pc_out <= pc_out;
-        else
-            pc_out <= pc_delayed;  
+       
+        else if (jump_enable_in)
+            pc_out <= jump_addr_in;
+        else 
+            pc_out <= pc_out + 32'd4;
+            //pc_out <= pc_out;
     end
-        
-
-    
-    
     
 endmodule
